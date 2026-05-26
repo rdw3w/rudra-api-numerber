@@ -23,20 +23,35 @@ export async function GET(req) {
 
     const response = await fetch(`${UPSTREAM}/${query}`, {
       headers: {
-        "User-Agent": "RudraX/3.0"
+        "User-Agent": "RudraX/5.0"
       },
       cache: "no-store"
     });
 
-    const data = await response.json();
+    const raw = await response.json();
 
+    // Hide unwanted fields
+    const {
+      status,
+      owner,
+      type,
+      used,
+      remaining,
+      ...cleanData
+    } = raw;
+
+    // Final custom response
     return NextResponse.json({
+      "🔥 START 🔥": "👑 Shatarudra Prakash Singh 👑",
+
       success: true,
-      owner: "Shatarudra Prakash Singh",
-      branding: "Rudra X Lookup",
+      branding: "⚡ Rudra X Lookup ⚡",
       query,
       timestamp: new Date().toISOString(),
-      data
+
+      data: cleanData,
+
+      "🔥 END 🔥": "👑 Shatarudra Prakash Singh 👑"
     });
 
   } catch (err) {
