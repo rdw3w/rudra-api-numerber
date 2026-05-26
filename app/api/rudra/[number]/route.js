@@ -1,38 +1,32 @@
 import { NextResponse } from "next/server";
 
-const API_KEY = process.env.RUDRA_API_KEY;
-const UPSTREAM = process.env.UPSTREAM_URL;
+const UPSTREAM =
+  "https://details-checker-backend.onrender.com/lookup";
 
-export async function GET(req, { params }) {
+export async function GET(req) {
   try {
-    const { number } = params;
+    const query = req.nextUrl.searchParams.get("query");
 
-    const key = req.nextUrl.searchParams.get("key");
-
-    if (key !== API_KEY) {
+    if (!query) {
       return NextResponse.json({
         success: false,
-        error: "Unauthorized"
-      }, { status: 401 });
+        error: "Query parameter required"
+      }, { status: 400 });
     }
 
-    if (!/^[6-9]\d{9}$/.test(number)) {
+    if (!/^[6-9]\d{9}$/.test(query)) {
       return NextResponse.json({
         success: false,
         error: "Invalid Indian mobile number"
       }, { status: 400 });
     }
 
-    const response = await fetch(`${UPSTREAM}/${number}`, {
+    const response = await fetch(`${UPSTREAM}/${query}`, {
       headers: {
-        "User-Agent": "RudraX/2.0"
+        "User-Agent": "RudraX/3.0"
       },
       cache: "no-store"
     });
-
-    if (!response.ok) {
-      throw new Error("Upstream API failed");
-    }
 
     const data = await response.json();
 
@@ -40,9 +34,8 @@ export async function GET(req, { params }) {
       success: true,
       owner: "Shatarudra Prakash Singh",
       branding: "Rudra X Lookup",
-      query: number,
+      query,
       timestamp: new Date().toISOString(),
-      source: "details-checker-backend",
       data
     });
 
